@@ -1,0 +1,53 @@
+{
+  "vehicules": [
+    {
+      "id": 1,
+      "matricule": "123TUN789",
+      "marque": "Renault",
+      "modele": "Trafic",
+      "statut": "Disponible",
+      "chauffeur": "Ahmed Ben Salem",
+      "kilometrage": 45230,
+      "typeCarburant": "Diesel",
+      "dateProchaineMaintenance": "2026-03-15",
+      "derniereMaintenanceKm": 35000
+    },
+    {
+      "id": 2,
+      "matricule": "456TUN123",
+      "marque": "Peugeot",
+      "modele": "Partner",
+      "statut": "En mission",
+      "chauffeur": "Mohamed Ali",
+      "kilometrage": 38900,
+      "typeCarburant": "Essence",
+      "dateProchaineMaintenance": "2026-03-18",
+      "derniereMaintenanceKm": 30000
+    }
+  ],
+  "missions": [
+    {
+      "id": "M001",
+      "titre": "Livraison Sfax",
+      "destination": "Sfax",
+      "chauffeur": "Ahmed Ben Salem",
+      "vehicule": "123TUN789",
+      "dateDepart": "2026-03-15",
+      "dateRetour": "2026-03-16",
+      "statut": "Planifiée",
+      "priorite": "Haute"
+    }
+  ],
+  "chauffeurs": [
+    {
+      "id": 1,
+      "nom": "Ben Salem",
+      "prenom": "Ahmed",
+      "email": "ahmed@agil.tn",
+      "telephone": "98 765 432",
+      "disponible": true,
+      "missionsEffectuees": 45,
+      "kilometresParcourus": 12450
+    }
+  ]
+}

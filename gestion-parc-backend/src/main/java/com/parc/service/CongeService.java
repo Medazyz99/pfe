@@ -1,0 +1,95 @@
+package com.parc.service;
+
+import com.parc.dto.CongeDTO;
+import com.parc.domain.entity.Conge;
+import com.parc.domain.entity.Chauffeur;
+import com.parc.domain.enums.StatutConge;
+import com.parc.repository.CongeRepository;
+import com.parc.repository.ChauffeurRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+public class CongeService {
+
+    private final CongeRepository congeRepository;
+    private final ChauffeurRepository chauffeurRepository;
+    private final NotificationService notificationService;
+
+    // Constructeur explicite (remplace @RequiredArgsConstructor)
+    public CongeService(CongeRepository congeRepository,
+                        ChauffeurRepository chauffeurRepository,
+                        NotificationService notificationService) {
+        this.congeRepository = congeRepository;
+        this.chauffeurRepository = chauffeurRepository;
+        this.notificationService = notificationService;
+    }
+
+    private CongeDTO toDTO(Conge c) {
+        CongeDTO dto = new CongeDTO();
+        dto.setId(c.getId());
+        dto.setDateDebut(c.getDateDebut());
+        dto.setDateFin(c.getDateFin());
+        dto.setMotif(c.getMotif());
+        dto.setStatut(c.getStatut().name());
+        dto.setDateDemande(c.getDateDemande());
+        dto.setReponseMessage(c.getReponseMessage());
+        if (c.getChauffeur() != null) {
+            dto.setChauffeurId(c.getChauffeur().getId());
+            dto.setChauffeurNom(c.getChauffeur().getNom() + " " + c.getChauffeur().getPrenom());
+        }
+        return dto;
+    }
+
+    private Conge toEntity(CongeDTO dto, Chauffeur chauffeur) {
+        Conge c = new Conge();
+        c.setChauffeur(chauffeur);
+        c.setDateDebut(dto.getDateDebut());
+        c.setDateFin(dto.getDateFin());
+        c.setMotif(dto.getMotif());
+        c.setStatut(StatutConge.EN_ATTENTE);
+        return c;
+    }
+
+    @Transactional
+    public CongeDTO createDemande(CongeDTO dto, Long chauffeurId) {
+        Chauffeur chauffeur = chauffeurRepository.findById(chauffeurId)
+                .orElseThrow(() -> new RuntimeException("Chauffeur non trouvé"));
+        Conge conge = toEntity(dto, chauffeur);
+        conge = congeRepository.save(conge);
+        return toDTO(conge);
+    }
+
+    public List<CongeDTO> getDemandesEnAttente() {
+        return congeRepository.findByStatut(StatutConge.EN_ATTENTE.name()).stream()
+                .map(this::toDTO).collect(Collectors.toList());
+    }
+
+    public List<CongeDTO> getMesDemandes(Long chauffeurId) {
+        return congeRepository.findByChauffeurId(chauffeurId).stream()
+                .map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public CongeDTO repondreDemande(Long id, String statut, String message) {
+        Conge conge = congeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Demande non trouvée"));
+        conge.setStatut(StatutConge.valueOf(statut));
+        conge.setReponseMessage(message);
+        conge = congeRepository.save(conge);
+
+        // Notification au chauffeur
+        notificationService.envoyerNotificationChauffeur(conge.getChauffeur().getId(),
+            "Votre demande de congé a été " + (statut.equals("APPROUVE") ? "approuvée" : "refusée") +
+            (message != null ? " : " + message : ""));
+        return toDTO(conge);
+    }
+
+    public List<CongeDTO> getHistorique() {
+        return congeRepository.findAll().stream()
+                .map(this::toDTO).collect(Collectors.toList());
+    }
+}
