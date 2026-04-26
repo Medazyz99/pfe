@@ -18,19 +18,18 @@ public class MaintenanceService {
     private final VehiculeRepository vehiculeRepository;
     private final GarageRepository garageRepository;
     private final SmsService smsService;
-    private final PushNotificationService pushService;
+    // private final PushNotificationService pushService;
 
     // Constructeur explicite (remplace @RequiredArgsConstructor)
     public MaintenanceService(MaintenanceRepository maintenanceRepository,
                               VehiculeRepository vehiculeRepository,
                               GarageRepository garageRepository,
-                              SmsService smsService,
-                              PushNotificationService pushService) {
+                              SmsService smsService) {
         this.maintenanceRepository = maintenanceRepository;
         this.vehiculeRepository = vehiculeRepository;
         this.garageRepository = garageRepository;
         this.smsService = smsService;
-        this.pushService = pushService;
+        // this.pushService = pushService;
     }
 
     private MaintenanceDTO toDTO(Maintenance m) {
@@ -91,16 +90,16 @@ public class MaintenanceService {
             );
             smsService.sendSms(garage.getTelephone(), message);
         }
-        if (garage != null && garage.getFcmToken() != null && !garage.getFcmToken().isEmpty()) {
-            String title = "Nouvelle maintenance";
-            String body = String.format(
-                "Maintenance prévue pour le véhicule %s le %s.\nType: %s",
-                maintenance.getVehicule().getMatricule(),
-                maintenance.getDatePrevue(),
-                maintenance.getType()
-            );
-            pushService.sendPush(garage.getFcmToken(), title, body);
-        }
+        // if (garage != null && garage.getFcmToken() != null && !garage.getFcmToken().isEmpty()) {
+        //     String title = "Nouvelle maintenance";
+        //     String body = String.format(
+        //         "Maintenance prévue pour le véhicule %s le %s.\nType: %s",
+        //         maintenance.getVehicule().getMatricule(),
+        //         maintenance.getDatePrevue(),
+        //         maintenance.getType()
+        //     );
+        //     pushService.sendPush(garage.getFcmToken(), title, body);
+        // }
         return toDTO(maintenance);
     }
 

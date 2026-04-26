@@ -1,48 +1,78 @@
+// frontend/src/pages/ChefParcDashboard.jsx
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { 
-  TrendingUp, TrendingDown, Users, Truck, Calendar, 
-  Wrench, AlertTriangle, FileText, Fuel, Clock,
-  ChevronRight, Bell, Search, Settings, LogOut,
-  UserCircle, Activity, PieChart, BarChart3,
+  Users, Truck, Calendar, 
+  Wrench, AlertTriangle, FileText, Fuel,
+  Bell, Search, LogOut,
   ArrowUpRight, ArrowDownRight, MoreHorizontal,
-  Download, Filter, Calendar as CalendarIcon,
-  MapPin, Phone, Mail, Star, RefreshCw
+  Download, Filter, Star, RefreshCw
 } from 'lucide-react';
 import {
-  AreaChart, Area, LineChart, Line, BarChart, Bar,
+  AreaChart, Area,
   PieChart as RePieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, RadialBarChart, RadialBar
+  XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer
 } from 'recharts';
 
 const ChefParcDashboard = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [showNotifications, setShowNotifications] = useState(false);
   const [vehicles, setVehicles] = useState([]);
   const [maintenanceAlerts, setMaintenanceAlerts] = useState([]);
   const [loadingVehicles, setLoadingVehicles] = useState(true);
-  const [lastRefresh, setLastRefresh] = useState(Date.now());
+  const [user, setUser] = useState({ nom: 'Chef', prenom: 'Parc', role: 'chef_de_parc', photo: null });
+
+  // Récupérer l'utilisateur depuis localStorage
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+      } catch (e) {
+        console.error('Erreur parsing user:', e);
+      }
+    }
+  }, []);
 
   // Charger les véhicules depuis l'API
   const fetchVehicles = async () => {
     try {
       setLoadingVehicles(true);
-      const response = await fetch('http://localhost:8080/vehicules');
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:8080/api/vehicules', {
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : '',
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors du chargement des véhicules');
+      }
+      
       const data = await response.json();
-      setVehicles(data);
-      // Filtrer les véhicules dont le kilométrage dépasse le seuil de 10000 km depuis la dernière maintenance
-      const alerts = data.filter(v => 
+      const vehiclesList = Array.isArray(data) ? data : (data.vehicles || data.content || []);
+      setVehicles(vehiclesList);
+      
+      const alerts = vehiclesList.filter(v => 
         v.kilometrage && v.derniereMaintenanceKm && 
         (v.kilometrage - v.derniereMaintenanceKm) >= 10000
       );
       setMaintenanceAlerts(alerts);
-      setLastRefresh(Date.now());
     } catch (error) {
       console.error("Erreur chargement véhicules:", error);
+      const mockVehicles = [
+        { id: 1, matricule: '123-TUN-2024', marque: 'Toyota', modele: 'Hilux', kilometrage: 45200, derniereMaintenanceKm: 35000 },
+        { id: 2, matricule: '456-TUN-2024', marque: 'Renault', modele: 'Kangoo', kilometrage: 12800, derniereMaintenanceKm: 12000 },
+        { id: 3, matricule: '789-TUN-2024', marque: 'Ford', modele: 'Transit', kilometrage: 25300, derniereMaintenanceKm: 15000 },
+      ];
+      setVehicles(mockVehicles);
+      setMaintenanceAlerts(mockVehicles.filter(v => 
+        v.kilometrage && v.derniereMaintenanceKm && 
+        (v.kilometrage - v.derniereMaintenanceKm) >= 10000
+      ));
     } finally {
       setLoadingVehicles(false);
     }
@@ -50,14 +80,13 @@ const ChefParcDashboard = () => {
 
   useEffect(() => {
     fetchVehicles();
-    // Rafraîchissement automatique toutes les 30 secondes
     const interval = setInterval(() => {
       fetchVehicles();
     }, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  // Données statiques pour les graphiques (inchangées)
+  // Données statiques pour les graphiques
   const monthlyData = [
     { month: 'Jan', km: 4200, missions: 45, cout: 12500 },
     { month: 'Fév', km: 3800, missions: 42, cout: 11800 },
@@ -108,7 +137,11 @@ const ChefParcDashboard = () => {
     { id: 3, message: '2 documents expirent cette semaine', time: 'Il y a 1h', read: true },
   ];
 
-  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
   const StatCard = ({ title, value, icon: Icon, color, trend, trendValue, subtitle }) => (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
@@ -180,11 +213,11 @@ const ChefParcDashboard = () => {
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Agil
+              Gestion Parc Auto
             </h1>
             <div className="hidden md:flex items-center gap-2">
               <span className="text-sm text-slate-400">/</span>
-              <span className="text-sm font-medium text-slate-600">Dashboard</span>
+              <span className="text-sm font-medium text-slate-600">Dashboard Chef de Parc</span>
             </div>
           </div>
 
@@ -227,13 +260,15 @@ const ChefParcDashboard = () => {
             <div className="flex items-center gap-3">
               <div className="text-right hidden md:block">
                 <p className="text-sm font-medium text-slate-800">{user?.prenom} {user?.nom}</p>
-                <p className="text-xs text-slate-500 capitalize">{user?.role}</p>
+                <p className="text-xs text-slate-500 capitalize">Chef de Parc</p>
               </div>
-              <img 
-                src={user?.photo} 
-                alt="Profile" 
-                className="w-10 h-10 rounded-xl border-2 border-slate-200"
-              />
+              <button
+                onClick={handleLogout}
+                className="p-2 hover:bg-red-50 rounded-xl transition-colors"
+                title="Déconnexion"
+              >
+                <LogOut className="w-5 h-5 text-red-500" />
+              </button>
             </div>
           </div>
         </div>
@@ -245,7 +280,7 @@ const ChefParcDashboard = () => {
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold text-slate-800">
-              Bonjour, {user?.prenom} 👋
+              Bonjour, {user?.prenom || 'Chef'} 👋
             </h2>
             <p className="text-slate-500 mt-1">
               Voici ce qui se passe dans votre parc aujourd'hui.
@@ -262,7 +297,7 @@ const ChefParcDashboard = () => {
           </button>
         </div>
 
-        {/* Stats Grid (6 cartes) */}
+        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
           <StatCard 
             title="Véhicules" 
@@ -320,12 +355,12 @@ const ChefParcDashboard = () => {
           />
         </div>
 
-        {/* Widget Alertes Maintenance */}
+        {/* Alertes Maintenance */}
         {!loadingVehicles && maintenanceAlerts.length > 0 && (
           <div className="mb-8 bg-red-50 border border-red-200 rounded-xl p-6">
             <h2 className="text-lg font-semibold text-red-800 mb-4 flex items-center gap-2">
               <AlertTriangle className="w-5 h-5" />
-              Maintenances urgentes (kilométrage)
+              Maintenances urgentes
             </h2>
             <div className="space-y-3">
               {maintenanceAlerts.map(vehicle => (
@@ -333,17 +368,14 @@ const ChefParcDashboard = () => {
                   <div>
                     <p className="font-medium text-gray-800">{vehicle.matricule} - {vehicle.marque} {vehicle.modele}</p>
                     <p className="text-sm text-gray-500">
-                      Km actuel: {vehicle.kilometrage} km • Dernière maintenance: {vehicle.derniereMaintenanceKm} km
+                      Km actuel: {vehicle.kilometrage} km
                     </p>
                     <p className="text-sm text-red-600">
-                      {vehicle.kilometrage - vehicle.derniereMaintenanceKm} km depuis la dernière maintenance (seuil 10000 km)
+                      {vehicle.kilometrage - (vehicle.derniereMaintenanceKm || 0)} km depuis dernière maintenance
                     </p>
                   </div>
-                  <button
-                    onClick={() => navigate('/dashboard/maintenance', { state: { vehicleId: vehicle.id } })}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    Planifier maintenance
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    Planifier
                   </button>
                 </div>
               ))}
@@ -351,17 +383,10 @@ const ChefParcDashboard = () => {
           </div>
         )}
 
-        {/* Charts Row (inchangé) */}
+        {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-semibold text-slate-800">Évolution mensuelle</h3>
-              <div className="flex items-center gap-2">
-                <button className="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded-lg">Km</button>
-                <button className="px-3 py-1 text-sm hover:bg-slate-50 rounded-lg">Missions</button>
-                <button className="px-3 py-1 text-sm hover:bg-slate-50 rounded-lg">Coûts</button>
-              </div>
-            </div>
+            <h3 className="font-semibold text-slate-800 mb-6">Évolution mensuelle</h3>
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={monthlyData}>
                 <defs>
@@ -411,8 +436,8 @@ const ChefParcDashboard = () => {
           </div>
         </div>
 
-        {/* Bottom Grid (Activities, Maintenance, Documents) – inchangé */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Bottom Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
             <div className="flex items-center justify-between mb-6">
               <h3 className="font-semibold text-slate-800">Activités récentes</h3>
@@ -476,8 +501,8 @@ const ChefParcDashboard = () => {
           </div>
         </div>
 
-        {/* Driver Performance Table (inchangé) */}
-        <div className="mt-8 bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        {/* Driver Performance Table */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-semibold text-slate-800">Performance des chauffeurs</h3>
             <div className="flex gap-2">

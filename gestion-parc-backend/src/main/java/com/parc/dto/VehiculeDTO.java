@@ -23,6 +23,7 @@ public class VehiculeDTO {
     private Double montantAssurance;
     private Long parcId;          // ID du parc associé
     private String parcNom;       // Nom du parc (optionnel, pour affichage)
+    private LocalDate dateProchaineMaintenance;
 
     // Constructeurs
     public VehiculeDTO() {}
@@ -93,4 +94,7 @@ public class VehiculeDTO {
 
     public String getParcNom() { return parcNom; }
     public void setParcNom(String parcNom) { this.parcNom = parcNom; }
+
+    public LocalDate getDateProchaineMaintenance() { return dateProchaineMaintenance; }
+    public void setDateProchaineMaintenance(LocalDate dateProchaineMaintenance) { this.dateProchaineMaintenance = dateProchaineMaintenance; }
 }

@@ -22,7 +22,7 @@ public class NotificationService {
     private final VehiculeRepository vehiculeRepository;
     private final ChauffeurRepository chauffeurRepository;
     private final SmsService smsService;
-    private final PushNotificationService pushService;
+    // private final PushNotificationService pushService;
 
     // Constructeur explicite (remplace @RequiredArgsConstructor)
     public NotificationService(NotificationRepository notificationRepository,
@@ -31,8 +31,7 @@ public class NotificationService {
                                MaintenanceRepository maintenanceRepository,
                                VehiculeRepository vehiculeRepository,
                                ChauffeurRepository chauffeurRepository,
-                               SmsService smsService,
-                               PushNotificationService pushService) {
+                               SmsService smsService) {
         this.notificationRepository = notificationRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.missionRepository = missionRepository;
@@ -40,7 +39,7 @@ public class NotificationService {
         this.vehiculeRepository = vehiculeRepository;
         this.chauffeurRepository = chauffeurRepository;
         this.smsService = smsService;
-        this.pushService = pushService;
+        // this.pushService = pushService;
     }
 
     // Conversion DTO
@@ -89,9 +88,9 @@ public class NotificationService {
         Notification saved = notificationRepository.save(notif);
 
         // Envoi push si disponible
-        if (destinataire instanceof Chauffeur && ((Chauffeur) destinataire).getFcmToken() != null) {
-            pushService.sendPush(((Chauffeur) destinataire).getFcmToken(), titre, message);
-        }
+        // if (destinataire instanceof Chauffeur && ((Chauffeur) destinataire).getFcmToken() != null) {
+        //     pushService.sendPush(((Chauffeur) destinataire).getFcmToken(), titre, message);
+        // }
 
         return toDTO(saved);
     }
@@ -127,11 +126,11 @@ public class NotificationService {
     // Notifications pour maintenance
     public void notifierMaintenanceProgrammee(Long garageId, Maintenance maintenance) {
         Garage garage = maintenance.getGarage();
-        if (garage != null && garage.getFcmToken() != null) {
-            pushService.sendPush(garage.getFcmToken(),
-                "Maintenance programmée",
-                "Une maintenance est prévue pour le " + maintenance.getDatePrevue());
-        }
+        // if (garage != null && garage.getFcmToken() != null) {
+        //     pushService.sendPush(garage.getFcmToken(),
+        //         "Maintenance programmée",
+        //         "Une maintenance est prévue pour le " + maintenance.getDatePrevue());
+        // }
         if (maintenance.getVehicule() != null && maintenance.getVehicule().getParc() != null) {
             envoyerNotification(maintenance.getVehicule().getParc().getChef().getId(),
                 "Maintenance programmée",
@@ -145,11 +144,11 @@ public class NotificationService {
     public void notifierMaintenanceImminente(Long maintenanceId) {
         Maintenance m = maintenanceRepository.findById(maintenanceId).orElse(null);
         if (m == null) return;
-        if (m.getGarage() != null && m.getGarage().getFcmToken() != null) {
-            pushService.sendPush(m.getGarage().getFcmToken(),
-                "Maintenance imminente",
-                "La maintenance prévue le " + m.getDatePrevue() + " approche");
-        }
+        // if (m.getGarage() != null && m.getGarage().getFcmToken() != null) {
+        //     pushService.sendPush(m.getGarage().getFcmToken(),
+        //         "Maintenance imminente",
+        //         "La maintenance prévue le " + m.getDatePrevue() + " approche");
+        // }
     }
 
     // Alertes expiration

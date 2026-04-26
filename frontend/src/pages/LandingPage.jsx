@@ -8,6 +8,9 @@ import {
   ArrowRight, Play, Menu, X, ExternalLink
 } from 'lucide-react';
 
+// Ajoute ces imports pour les icônes sociales
+import { FaInstagram, FaFacebook, FaYoutube } from 'react-icons/fa';
+
 const LandingPage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -18,6 +21,28 @@ const LandingPage = () => {
     { src: '/images/yaNqP.jpg', alt: 'Innovation & Avenir - Dépôt de carburants de Goulette', title: 'Innovation & Avenir' },
     { src: '/images/ohPEe.jpg', alt: 'Qui est AGIL ? - Leader du marché tunisien', title: 'Leader du marché tunisien' },
     { src: '/images/iMdiE.jpg', alt: 'Découvrez AGIL ENERGY - Société Nationale de Distribution des Pétroles', title: 'AGIL Energy' }
+  ];
+
+  // URLs des réseaux sociaux AGIL
+  const socialLinks = [
+    { 
+      name: 'Instagram', 
+      url: 'https://www.instagram.com/agilenergytunisie/?hl=fr', 
+      icon: FaInstagram, 
+      color: 'hover:text-pink-500' 
+    },
+    { 
+      name: 'Facebook', 
+      url: 'https://www.facebook.com/agil.com.tn', 
+      icon: FaFacebook, 
+      color: 'hover:text-blue-500' 
+    },
+    { 
+      name: 'YouTube', 
+      url: 'https://www.youtube.com/@agilTun', 
+      icon: FaYoutube, 
+      color: 'hover:text-red-500' 
+    }
   ];
 
   // Rotation automatique
@@ -336,7 +361,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Footer avec icônes sociales */}
       <footer className="bg-black border-t border-yellow-400/20 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -344,6 +369,23 @@ const LandingPage = () => {
               <img src="/images/logo-agil.jpeg" alt="Agil" className="h-8 w-auto" />
               <span className="font-bold text-lg text-yellow-400">Agil</span>
             </div>
+            
+            {/* Liens des réseaux sociaux */}
+            <div className="flex items-center gap-4">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.name}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`text-gray-400 hover:text-yellow-400 transition-all duration-300 hover:scale-110 ${social.color}`}
+                  title={social.name}
+                >
+                  <social.icon className="w-6 h-6" />
+                </a>
+              ))}
+            </div>
+            
             <p className="text-gray-400 text-sm">© 2026 Agil. Tous droits réservés.</p>
           </div>
         </div>

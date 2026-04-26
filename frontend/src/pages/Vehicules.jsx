@@ -265,7 +265,7 @@ const Vehicules = () => {
                       <span className="text-sm text-slate-600">{vehicle.typeCarburant}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-slate-600">{vehicle.kilometrage?.toLocaleString()} km</td>
+                  <td className="px-4 py-3 text-slate-600">{vehicle.kilometre?.toLocaleString()} km</td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-1 rounded-full text-xs ${getStatusBadge(vehicle.statut)}`}>
                       {vehicle.statut}
@@ -375,7 +375,7 @@ const Vehicules = () => {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Kilométrage</p>
-                  <p className="font-medium text-slate-800">{selectedVehicle.kilometrage?.toLocaleString()} km</p>
+                  <p className="font-medium text-slate-800">{selectedVehicle.kilometre?.toLocaleString()} km</p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Chauffeur</p>
@@ -387,11 +387,11 @@ const Vehicules = () => {
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Expiration carte grise</p>
-                  <p className="font-medium text-slate-800">{selectedVehicle.carteGriseExpiration}</p>
+                  <p className="font-medium text-slate-800">{selectedVehicle.dateExpirationCarteGrise}</p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-500">Expiration assurance</p>
-                  <p className="font-medium text-slate-800">{selectedVehicle.assuranceExpiration}</p>
+                  <p className="font-medium text-slate-800">{selectedVehicle.dateExpirationAssurance}</p>
                 </div>
               </div>
             </div>

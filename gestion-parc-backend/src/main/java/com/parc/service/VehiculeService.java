@@ -21,6 +21,9 @@ public class VehiculeService {
             v.setStatut("Disponible");
             v.setKilometre(45230.0);
             v.setTypeCarburant("Diesel");
+            v.setDateProchaineMaintenance(java.time.LocalDate.now().plusDays(30));
+            v.setDateExpirationAssurance(java.time.LocalDate.now().plusMonths(6));
+            v.setDateExpirationCarteGrise(java.time.LocalDate.now().plusYears(1));
             vehicules.add(v);
         }
         return vehicules;
